@@ -95,19 +95,6 @@ class SimpleDownloader {
     }
   }
 
-  /// try to open downloaded file.
-  Future<bool?> open() async {
-    if (_callback.status == DownloadStatus.completed) {
-      try {
-        return await SimpleDownloaderPlatform.instance.openFile(_task);
-      } catch (e) {
-        debugPrint("$e");
-        return Future.value(false);
-      }
-    }
-    return null;
-  }
-
   /// delete downloaded file.
   Future<bool?> delete() async {
     try {

@@ -14,9 +14,11 @@ class DownloaderTask {
   /// to set value of buffer size
   /// default 64 ( this mean 64 kb or 64 * 1024 )
   final int bufferSize;
+  final Map<String, String>? headers;
+
 
   const DownloaderTask(
-      {this.url, this.downloadPath, this.fileName, this.bufferSize = 64});
+      {this.url, this.downloadPath, this.fileName, this.bufferSize = 64,this.headers});
 
   DownloaderTask copyWith({
     String? url,

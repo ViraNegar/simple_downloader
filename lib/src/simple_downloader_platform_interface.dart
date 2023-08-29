@@ -27,8 +27,4 @@ abstract class SimpleDownloaderPlatform extends PlatformInterface {
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
-
-  Future<bool?> openFile(DownloaderTask task) {
-    throw UnimplementedError('');
-  }
 }

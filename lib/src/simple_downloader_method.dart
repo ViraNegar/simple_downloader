@@ -30,6 +30,9 @@ class DownloaderMethod {
       callback.status = DownloadStatus.running;
       Client httpClient = client;
       Request request = Request('GET', Uri.parse(task.url!));
+      if(task.headers != null){
+        request.headers.addAll(task.headers!);
+      }
       File file;
 
       /// if params resume value is true
@@ -50,14 +53,13 @@ class DownloaderMethod {
         total = int.parse(
             response.headers[HttpHeaders.contentRangeHeader]!.split("/").last);
       } else {
-        total = response.contentLength!;
       }
 
       final reader = ChunkedStreamReader(response.stream);
-
       subscription = _streamData(reader).listen((buffer) async {
         // accumulate length downloaded
         offset += buffer.length;
+        total = response.contentLength ?? offset;
 
         // Write buffer to disk
         file.writeAsBytesSync(buffer, mode: FileMode.writeOnlyAppend);
@@ -82,7 +84,8 @@ class DownloaderMethod {
       });
 
       return subscription;
-    } catch (e) {
+    } catch (e,stackTrace) {
+      callback.status = DownloadStatus.failed;
       rethrow;
     }
   }
