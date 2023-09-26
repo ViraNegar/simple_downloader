@@ -25,6 +25,25 @@ class DownloaderMethod {
     late StreamSubscription subscription;
     int total = 0;
     int offset = 0;
+    int totalBytesInSecs = 0;
+    List<double> speedPerSecs = [];
+    double avgSpeedPerSecs = 0;
+    final stopWatch = Stopwatch()..start();
+    Timer timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      final elapsedSeconds = stopWatch.elapsedMilliseconds / 1000;
+      final downloadSpeed = totalBytesInSecs / elapsedSeconds; // bytes per second
+      if(speedPerSecs.length > 4){
+        speedPerSecs.removeAt(0);
+      }
+      speedPerSecs.add(downloadSpeed);
+      avgSpeedPerSecs = 0;
+      speedPerSecs.forEach((element) {
+        avgSpeedPerSecs += element;
+      });
+      avgSpeedPerSecs = avgSpeedPerSecs / speedPerSecs.length;
+      stopWatch.reset();
+      totalBytesInSecs = 0;
+    });
 
     try {
       callback.status = DownloadStatus.running;
@@ -55,11 +74,13 @@ class DownloaderMethod {
       } else {
       }
 
+
       final reader = ChunkedStreamReader(response.stream);
       subscription = _streamData(reader).listen((buffer) async {
         // accumulate length downloaded
         offset += buffer.length;
         total = response.contentLength ?? offset;
+        totalBytesInSecs += buffer.length;
 
         // Write buffer to disk
         file.writeAsBytesSync(buffer, mode: FileMode.writeOnlyAppend);
@@ -68,17 +89,20 @@ class DownloaderMethod {
         callback
           ..offset = offset
           ..total = total
+          ..speedPerSec = avgSpeedPerSecs
           ..progress = (offset / total) * 100;
       }, onDone: () async {
         // rename file
         final path = p.join(task.downloadPath!, task.fileName!);
         await file.rename(path);
-
+        timer.cancel();
+        stopWatch.stop();
         // callback download progress
         callback.status = DownloadStatus.completed;
       }, onError: (error) {
         subscription.cancel();
-
+        timer.cancel();
+        stopWatch.stop();
         // callback download progress
         callback.status = DownloadStatus.failed;
       });
