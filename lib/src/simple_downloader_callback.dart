@@ -5,8 +5,11 @@ import 'package:flutter/foundation.dart';
 /// Its a controller to send progress downloading file
 class DownloaderCallback extends ChangeNotifier {
   double _progress = 0.0;
+  int _speedPerSec = 0;
 
   double get progress => _progress;
+
+  int get speedPerSec => _speedPerSec;
 
   set progress(double value) {
     _progress = value;
