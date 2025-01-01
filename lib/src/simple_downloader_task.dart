@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-@immutable
 class DownloaderTask {
   /// to set url
   final String? url;
